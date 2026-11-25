@@ -292,3 +292,19 @@ or the chat.
   overflow, one `<h1>`, and **zero console errors** (no hydration mismatch).
 - Open: the Pages run itself, and the static-export limits (40 articles, no ISR) become
   moot once the Vercel + CMS target lands at M5.
+
+## 2026-11-25 — Pages preview: verified live
+
+- Status: done
+- URL: <https://alexbonti.github.io/teleambiente/> (workflow run 45642327854, deploy 12 s)
+- Verified live (not just locally):
+  - `200` for `/`, `/tv/diretta/`, `/tv/palinsesto/`, `/cerca/`, `/temi/attualita/`,
+    `/icon.svg`, `/search-index.json`.
+  - CDP probe on the deployed home: no horizontal overflow, one `<h1>`, **zero console
+    errors**.
+  - Client search probe on the deployed `/cerca/`: typing "qualità" (no accent) returns 14
+    rows and the first hit is "L'esposomica e l'epigenetica per una migliore qualità della
+    vita" — the index and the accent folding work in production hosting.
+- Fixed on the way: pnpm version was declared twice (workflow + `packageManager`), which
+  failed the first run with `ERR_PNPM_BAD_PM_VERSION`; the workflow now reads it from
+  `package.json`. Actions bumped to checkout/setup-node v5.

@@ -36,6 +36,7 @@ pnpm audit:all          # crawl.mjs + weight.mjs -> data/audit/*; ~3 min, needs 
 node scripts/dev/shot.mjs <url> <out.png> [width] [height] [--full]   # needs a server
 # CDP render check: writes the screenshot and prints viewport/scrollWidth/h1Count/overflow
 # plus any console errors (hydration mismatches show up there, not in the image).
+# PROBE_EXPR="<js>" runs an async snippet after load, e.g. to type into client-side search.
 
 # GitHub Pages preview (static export; also what CI runs)
 node scripts/dev/build-search-index.mjs            # -> app/public/search-index.json
@@ -140,7 +141,9 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
 - Last verified 2026-11-25: typecheck clean, 32/32 tests pass, lint clean, both builds pass
   (server: 25 routes; static export: 40 articles + 6 hubs + 12 programmes into `app/out`),
   `impeccable detect` returns no findings, CDP checks show no horizontal overflow, one
-  `<h1>` per template and no console errors at 390 and 1440 px.
+  `<h1>` per template and no console errors at 390 and 1440 px — plus the same checks
+  against the deployed preview at <https://alexbonti.github.io/teleambiente/>, including a
+  `PROBE_EXPR` interaction test of the client-side search.
 
 ## Gotchas
 

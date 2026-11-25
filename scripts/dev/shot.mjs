@@ -167,6 +167,19 @@ const report = JSON.parse(metrics.result.value);
 report.consoleIssues = consoleIssues;
 console.log(JSON.stringify(report, null, 2));
 
+// Optional interaction probe: PROBE_EXPR is evaluated in the page after load, which is how
+// client-side behaviour (search filtering, the live player) is checked without a browser
+// automation dependency.
+const probeExpr = process.env.PROBE_EXPR;
+if (probeExpr) {
+  const probe = await cdp.send("Runtime.evaluate", {
+    expression: `(async () => { ${probeExpr} })()`,
+    awaitPromise: true,
+    returnByValue: true,
+  });
+  console.log(JSON.stringify({ probe: probe.result?.value ?? probe.exceptionDetails ?? null }, null, 2));
+}
+
 const shot = await cdp.send("Page.captureScreenshot", {
   format: "png",
   captureBeyondViewport: fullPage,

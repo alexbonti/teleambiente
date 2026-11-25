@@ -33,10 +33,15 @@ pnpm lint               # eslint (flat config), clean
 pnpm build              # next build (Turbopack), 25 routes
 pnpm audit:all          # crawl.mjs + weight.mjs -> data/audit/*; ~3 min, needs network
 
-node scripts/dev/shot.mjs <url> <out.png> [width] [height] [--full]   # needs `pnpm dev`
-# CDP render check: writes the screenshot and prints viewport/scrollWidth/h1Count/overflow.
-# Chrome 158 ignores --window-size with --screenshot, so this script is the only reliable
-# way to see the 390 px layout. Chrome is driven with a repo-local profile under .cache/.
+node scripts/dev/shot.mjs <url> <out.png> [width] [height] [--full]   # needs a server
+# CDP render check: writes the screenshot and prints viewport/scrollWidth/h1Count/overflow
+# plus any console errors (hydration mismatches show up there, not in the image).
+
+# GitHub Pages preview (static export; also what CI runs)
+node scripts/dev/build-search-index.mjs            # -> app/public/search-index.json
+STATIC_EXPORT=true NEXT_PUBLIC_BASE_PATH=/teleambiente pnpm build   # -> app/out
+# Chrome 158 ignores --window-size with --screenshot: this is the only reliable way to
+# see the 390 px layout. It drives the system Chrome with a repo-local profile.
 ```
 
 Installs: run them from `app/` with `--config.store-dir=$PWD/../.cache/pnpm-home/store`
@@ -53,6 +58,7 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
 | What the current site actually is | `docs/audit/digital-footprint.md`, then `data/audit/summary.json` |
 | Competitive/market context | `docs/audit/benchmark.md` |
 | Build or change a template | `docs/design/visual-direction.md` → `app/PRODUCT.md` → `app/src/components/story.tsx` + `globals.css` |
+| Anything that depends on "now" | `app/src/lib/clock.ts` + `app/src/lib/use-now.ts` (the clock is client-side by contract) |
 | Change the schedule / live utility | `app/src/lib/schedule.ts` (grid + helpers) → `app/src/components/programme-grid.tsx` |
 | Change the content source (WP → CMS) | `app/src/lib/content/index.ts` + `wp.ts` (the adapter is the seam) |
 | Plan the migration / URLs | `docs/tech/architecture.md`, `docs/design/ia-and-content-model.md` |
@@ -64,10 +70,14 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
 | --- | --- |
 | `app/src/app` | Routes: `/` front page, `/[slug]` article, `/temi/[slug]` hub, `/tv/diretta`, `/tv/palinsesto`, `/tv/programmi/[slug]`, `/cerca`, `/chi-siamo`, `not-found`. |
 | `app/src/components` | Shell (`site-header`, `primary-nav`, `on-air-bar`, `site-footer`), story units, `programme-grid`, `live-player` (client, hls.js on intent). |
-| `app/src/lib/schedule.ts` | The broadcast grid as editorial data + Rome-time helpers (`currentSlot`, `nextSlot`, `upcomingSlots`, `slotsForDay`). |
+| `app/src/lib/schedule.ts` | The broadcast grid as editorial data + Rome-time helpers (`currentSlot`, `nextSlot`, `upcomingSlots`, `slotsForDay`). Client views (`on-air-bar`, `on-air-panel`, `programme-grid`, `live-page-body`) read it through `useRomeNow`. |
 | `app/src/app/globals.css` | The design system: palette, type scale, `.label`, `.channel-badge`, `.prose-tv`, focus/selection/scrollbar theming, the single motion moment. |
-| `app/src/fonts` | Self-hosted variable Archivo + Source Serif 4 (OFL). |
-| `scripts/dev/shot.mjs` | CDP screenshot + layout probe used to verify templates at 1440 and 390 px. |
+| `app/src/fonts` | Self-hosted variable Archivo + Source Serif 4 (OFL); `app/src/app/icon.svg` is the favicon. |
+| `scripts/dev/shot.mjs` | CDP screenshot + layout probe (also console errors) used to verify templates at 1440 and 390 px. |
+| `scripts/dev/build-search-index.mjs` | Builds `app/public/search-index.json` (latest 1,000 posts) for the static preview's client-side search. |
+| `app/src/lib/clock.ts` | The only place the render path reads the wall clock (`nowMs`), plus `floorToMinute` for stable snapshots. |
+| `app/src/lib/asset.ts` | Prefixes public assets with `NEXT_PUBLIC_BASE_PATH` (next/image does not under `output: export`). |
+| `.github/workflows/pages.yml` | Builds the static export and deploys it to GitHub Pages on every push to `main`. |
 | `app/src/lib/content/types.ts` | Domain model (`Article`, `Author`, `HubRef`, `ContentImage`) — the template contract |
 | `app/src/lib/content/wp.ts` | WordPress REST adapter: fetch + pure `mapWpPost` mapper |
 | `app/src/lib/content/index.ts` | `content` switchboard — the only place a source is chosen |
@@ -75,7 +85,7 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
 | `scripts/audit` | Reproducible crawlers: `crawl.mjs`, `weight.mjs`, shared `lib.mjs` |
 | `data/audit` | Committed evidence: `urls.csv` (26,272 URLs), `sample.csv`, `summary.json`, `weight.json` |
 | `docs/audit` | Digital-footprint audit + benchmark |
-| `docs/strategy`, `docs/design`, `docs/tech` | Strategy, IA/design system, architecture & migration (M2–M5) |
+| `docs/strategy`, `docs/tech` | Strategy (M2), architecture & migration (M5) — still to be written |
 | `.dsh/skills/` | Project agent tooling (unrelated to the product) |
 
 ## Hard contracts
@@ -98,15 +108,18 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
    images, JS ≤ 150 KB gzip, LCP < 2.0 s on throttled mobile 4G, CLS < 0.05.
 8. **The schedule is editorial data.** `app/src/lib/schedule.ts` mirrors what the channel
    publishes; never invent a slot to fill an empty day, and keep the grid in Rome time.
-9. **One visual authority.** `docs/design/visual-direction.md` is the world; the palette and
+9. **"Now" is computed in the browser.** Pages render a snapshot (`nowMs()`), client
+   components correct it on mount and tick every 30 s. Never render on-air state that
+   only the build could know; a static host would freeze it.
+10. **One visual authority.** `docs/design/visual-direction.md` is the world; the palette and
    type tokens in `globals.css` are the implementation. Do not introduce a second accent,
    a display face from the category defaults, cards, shadows or gradients.
-10. **Accessibility floor:** WCAG 2.2 AA — one `<h1>` per page, visible focus ring,
+11. **Accessibility floor:** WCAG 2.2 AA — one `<h1>` per page, visible focus ring,
     44 px touch targets, no colour-only state. Brand green `#2CAD00` is graphic only
     (2.64:1); green text uses `#147A00` (4.91:1).
-11. **No secrets, credentials, customer data or machine-specific absolute paths** in the
+12. **No secrets, credentials, customer data or machine-specific absolute paths** in the
     repo, docs or data.
-12. **Caches live in the repo.** The sandbox cannot write to `$HOME`; `.npmrc` pins the
+13. **Caches live in the repo.** The sandbox cannot write to `$HOME`; `.npmrc` pins the
     pnpm store and npm cache under `.cache/`. Do not "fix" that by deleting `.npmrc`.
 
 ## Conventions
@@ -124,10 +137,10 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
 - Fast loop: `pnpm typecheck && pnpm test` (≈ 5 s).
 - Before handoff/milestone: `pnpm lint && pnpm build && pnpm audit:all`; then re-read the
   newest worklog entry and correct anything stale in this guide.
-- Last verified 2026-11-25: typecheck clean, 32/32 tests pass, lint clean, build emits 25
-  routes (6 hubs + 12 programmes SSG, ISR front page, on-demand articles), `impeccable
-  detect` returns no findings, CDP checks show no horizontal overflow and one `<h1>` per
-  template at 1440 and 390 px. Audit produced 26,272 sitemap URLs and 5 weight reports.
+- Last verified 2026-11-25: typecheck clean, 32/32 tests pass, lint clean, both builds pass
+  (server: 25 routes; static export: 40 articles + 6 hubs + 12 programmes into `app/out`),
+  `impeccable detect` returns no findings, CDP checks show no horizontal overflow, one
+  `<h1>` per template and no console errors at 390 and 1440 px.
 
 ## Gotchas
 
@@ -137,8 +150,9 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
 - **`npm`/`pnpm` without the repo-local cache fail** (`EACCES` on `~/.npm`): keep
   `.npmrc` and run installs from the repo root. `pnpm install` also appends
   `minimumReleaseAgeExclude` entries to `pnpm-workspace.yaml` — commit them.
-- **The build fetches the live WordPress API** (ISR, `revalidate=300`). Building offline
-  yields the fallback UI; `page.tsx` catches the error on purpose.
+- **Every build fetches the live WordPress API** (no ISR declared; pages render per
+  request in the server build, at build time in the export). Offline builds yield the
+  fallback UI — `page.tsx` catches the error on purpose.
 - **The host WAF (BitNinja) rate-limits.** Audit scripts use concurrency ≤ 6 with a
   delay; keep it polite.
 - **Category URLs live at `/categorie/{slug}/`.** `/attualita/` is a 404; do not infer
@@ -155,6 +169,15 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
   also ignores `--window-size` on Chrome 158 — use `scripts/dev/shot.mjs`.
 - **`pnpm --filter app <cmd>` can fail with a store-location mismatch** after switching
   `.npmrc`; run the command from `app/` with an explicit `--config.store-dir`.
+- **Segment configs must be literals.** `export const revalidate = process.env.X ? false : 300`
+  fails the build ("Invalid segment configuration export"). That is why no page declares
+  `revalidate` any more: caching returns with the Vercel/CMS target (M5).
+- **The Pages preview is a static export** (`STATIC_EXPORT=true`): no ISR, no server
+  functions, no image optimizer, articles limited to the latest 40 via
+  `generateStaticParams`, search from a generated JSON index. The server build stays the
+  default so nothing here leaks into production.
+- **WordPress sends no CORS header**, so the browser cannot query the REST API from a
+  static host; that is why search ships an index instead of calling the API.
 - **WordPress bodies repeat the excerpt as the first block** (sometimes an `<h4>`), embed
   Instagram blockquotes that die without their script, and auto-excerpts end in `[...]`:
   `stripLeadingDek` / `replaceSocialEmbeds` / `cleanDek` in `content/html.ts` exist for this
@@ -162,6 +185,8 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
 
 ## Recent milestones (newest first, max 5)
 
+- 2026-11-25 — GitHub Pages preview live: dual build (server default / static export),
+  client-side clock, static search index, deploy workflow.
 - 2026-11-25 — M4: "Guida TV" design system and the 8-template prototype (home, article,
   hub, live, schedule, programme, search, about) on the live WordPress API; 32 tests.
 - 2026-11-25 — M0+M1: Next.js prototype scaffold with a WordPress content adapter,

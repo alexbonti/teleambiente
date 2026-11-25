@@ -1,14 +1,17 @@
+"use client";
+
 import Link from "next/link";
 
 import { currentSlot, nextSlot } from "@/lib/schedule";
+import { useRomeNow } from "@/lib/use-now";
 
 /**
  * The persistent on-air marker. It answers the question the audience actually has when
  * they land from television or social: what is on right now, and what is next? Server-
  * rendered from the published grid in Europe/Rome, so it renders without JavaScript.
  */
-export function OnAirBar() {
-  const now = new Date();
+export function OnAirBar({ initialNow }: { initialNow: number }) {
+  const now = useRomeNow(initialNow);
   const live = currentSlot(now);
   const upcoming = nextSlot(now);
 

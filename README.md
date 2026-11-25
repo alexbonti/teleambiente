@@ -33,6 +33,11 @@ is judged on real articles, real hubs and the real broadcast grid.
 | `/cerca` | Archive search |
 | `/chi-siamo`, 404 | About and not-found |
 
+**Live preview:** <https://alexbonti.github.io/teleambiente/> — a static export of the same
+templates, rebuilt on every push to `main` by `.github/workflows/pages.yml`. It is a
+preview, not production: no ISR, and it ships the latest 40 articles (search covers the
+latest 1,000) because a static host cannot render the whole 11.9k archive on demand.
+
 Rendered at 1440 and 390 px: [`docs/design/screens/`](docs/design/screens). The visual
 world and its rules are in [`docs/design/visual-direction.md`](docs/design/visual-direction.md);
 product truth is in [`app/PRODUCT.md`](app/PRODUCT.md).
@@ -55,7 +60,11 @@ pnpm dev            # http://localhost:3000
 pnpm typecheck && pnpm test && pnpm build
 pnpm audit:all      # refresh data/audit/* from teleambiente.tv
 
-# rendered-template check (needs `pnpm dev` in another shell)
+# static export, served from /teleambiente/ like GitHub Pages
+node scripts/dev/build-search-index.mjs
+STATIC_EXPORT=true NEXT_PUBLIC_BASE_PATH=/teleambiente pnpm build   # -> app/out
+
+# rendered-template check (needs a server in another shell)
 node scripts/dev/shot.mjs http://localhost:3000/ .cache/home.png 390 1800
 ```
 

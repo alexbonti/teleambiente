@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { asset } from "@/lib/asset";
 import { formatDateLong } from "@/lib/format";
 import { CHANNELS, PRIMARY_NAV } from "@/lib/navigation";
 import { OnAirBar } from "./on-air-bar";
 import { PrimaryNav } from "./primary-nav";
 
-export function SiteHeader() {
+export function SiteHeader({ initialNow }: { initialNow: number }) {
   return (
     <header>
       <div className="border-b border-rule bg-paper-deep">
@@ -37,7 +38,7 @@ export function SiteHeader() {
       <div className="page-shell flex flex-wrap items-end justify-between gap-x-8 gap-y-3 py-4">
         <Link href="/" className="group flex items-end gap-4">
           <Image
-            src="/brand/teleambiente-logo.webp"
+            src={asset("/brand/teleambiente-logo.webp")}
             alt="TeleAmbiente"
             width={560}
             height={345}
@@ -64,7 +65,7 @@ export function SiteHeader() {
 
       <PrimaryNav />
 
-      <OnAirBar />
+      <OnAirBar initialNow={initialNow} />
     </header>
   );
 }

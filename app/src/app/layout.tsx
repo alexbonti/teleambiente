@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { nowMs } from "@/lib/clock";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Vai al contenuto
         </a>
-        <SiteHeader />
+        <SiteHeader initialNow={nowMs()} />
         <div id="contenuto">{children}</div>
         <SiteFooter />
       </body>

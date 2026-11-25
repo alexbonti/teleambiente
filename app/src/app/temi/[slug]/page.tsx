@@ -8,7 +8,6 @@ import { content } from "@/lib/content";
 import { formatDateline } from "@/lib/format";
 import { NAV_HUBS } from "@/lib/navigation";
 
-export const revalidate = 300;
 
 export function generateStaticParams() {
   return NAV_HUBS.map((hub) => ({ slug: hub.slug }));

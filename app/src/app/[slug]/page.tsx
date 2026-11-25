@@ -8,7 +8,18 @@ import { content } from "@/lib/content";
 import { replaceSocialEmbeds, sanitizeHtml, stripLeadingDek, toPlainText } from "@/lib/content/html";
 import { formatDateline, readingMinutes } from "@/lib/format";
 
-export const revalidate = 60;
+
+/**
+ * A static host has no server to render an unknown slug, so the Pages preview ships the
+ * latest articles and 404s the rest; the full archive stays on the live WordPress site
+ * until the CMS migration. On the server build `dynamicParams` stays on and any slug renders.
+ */
+export async function generateStaticParams() {
+  if (process.env.STATIC_EXPORT !== "true") return [];
+  const articles = await content.getLatestArticles(40).catch(() => []);
+  return articles.map((article) => ({ slug: article.slug }));
+}
+
 
 export async function generateMetadata({
   params,

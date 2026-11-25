@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { nowMs } from "@/lib/clock";
 
 import { ProgrammeGrid } from "@/components/programme-grid";
 import { programmesByGenre } from "@/lib/schedule";
 
-export const revalidate = 300;
 
 export const metadata = {
   title: "Palinsesto",
@@ -29,7 +29,7 @@ export default function PalinsestoPage() {
         <h2 id="griglia" className="label mb-3">
           Griglia settimanale · ora di Roma
         </h2>
-        <ProgrammeGrid />
+        <ProgrammeGrid initialNow={nowMs()} />
       </section>
 
       <section aria-labelledby="programmi" className="mt-12">

@@ -77,8 +77,13 @@ class Cdp {
     this.socket = socket;
     this.id = 0;
     this.waiting = new Map();
+    this.listeners = new Map();
     socket.addEventListener("message", (event) => {
       const message = JSON.parse(event.data);
+      if (message.method !== undefined) {
+        for (const handler of this.listeners.get(message.method) ?? []) handler(message.params ?? {});
+        return;
+      }
       if (message.id !== undefined && this.waiting.has(message.id)) {
         const { resolve: done, reject } = this.waiting.get(message.id);
         this.waiting.delete(message.id);
@@ -86,6 +91,11 @@ class Cdp {
         else done(message.result);
       }
     });
+  }
+
+  on(method, handler) {
+    const handlers = this.listeners.get(method) ?? [];
+    this.listeners.set(method, [...handlers, handler]);
   }
 
   send(method, params = {}) {
@@ -103,7 +113,31 @@ await new Promise((done, reject) => {
 });
 
 const cdp = new Cdp(socket);
+
+// Console + uncaught errors are part of the check: a hydration mismatch or a failed
+// fetch shows up here and nowhere in the screenshot.
+const consoleIssues = [];
+cdp.on("Runtime.exceptionThrown", (params) => {
+  const detail = params.exceptionDetails;
+  consoleIssues.push(`exception: ${detail.exception?.description ?? detail.text}`);
+});
+cdp.on("Runtime.consoleAPICalled", (params) => {
+  if (params.type !== "error" && params.type !== "warning") return;
+  const text = (params.args ?? [])
+    .map((arg) => arg.value ?? arg.description ?? arg.preview?.description ?? "")
+    .join(" ")
+    .slice(0, 300);
+  consoleIssues.push(`${params.type}: ${text}`);
+});
+cdp.on("Log.entryAdded", (params) => {
+  const entry = params.entry;
+  if (entry.level !== "error") return;
+  consoleIssues.push(`log: ${entry.text.slice(0, 200)} ${entry.url ?? ""}`.trim());
+});
+
 await cdp.send("Page.enable");
+await cdp.send("Runtime.enable");
+await cdp.send("Log.enable");
 await cdp.send("Emulation.setDeviceMetricsOverride", {
   width,
   height,
@@ -130,6 +164,7 @@ const metrics = await cdp.send("Runtime.evaluate", {
 });
 
 const report = JSON.parse(metrics.result.value);
+report.consoleIssues = consoleIssues;
 console.log(JSON.stringify(report, null, 2));
 
 const shot = await cdp.send("Page.captureScreenshot", {

@@ -1,14 +1,17 @@
+"use client";
+
 import Link from "next/link";
 
 import { WEEKDAYS, currentSlot, romeNow, slotsForDay, toMinutes } from "@/lib/schedule";
+import { useRomeNow } from "@/lib/use-now";
 
 /**
  * The week grid, drawn like a listings page: a day rail on the left, times in a
  * fixed column, programmes as text with hairline separation. The current day is
  * marked, and the slot on air right now carries the only accent in the page.
  */
-export function ProgrammeGrid({ onlyDay }: { onlyDay?: number }) {
-  const now = new Date();
+export function ProgrammeGrid({ initialNow, onlyDay }: { initialNow: number; onlyDay?: number }) {
+  const now = useRomeNow(initialNow);
   const { day: today } = romeNow(now);
   const live = currentSlot(now);
 
@@ -90,8 +93,8 @@ export function ProgrammeGrid({ onlyDay }: { onlyDay?: number }) {
   );
 }
 
-export function TodayGrid() {
-  const now = new Date();
+export function TodayGrid({ initialNow }: { initialNow: number }) {
+  const now = useRomeNow(initialNow);
   const { day: today, minutes } = romeNow(now);
   const slots = slotsForDay(today);
   const live = currentSlot(now);

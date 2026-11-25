@@ -257,3 +257,38 @@ or the chat.
   rather than a hand-written duplicate.
 - Note: the update writes outside the workspace, so it needs full file access; under the
   `workspace-write` sandbox it fails with `EACCES … ~/.dsh/skills/impeccable/SKILL.md`.
+
+## 2026-11-25 — GitHub Pages preview: dual build and deploy
+
+- Status: done (deploy run pending at the time of writing; URL in README)
+- Goal: get the prototype onto a shareable URL without changing the production target
+  (Vercel + CMS at M5) and without a second codebase.
+- Did:
+  - `app/next.config.ts` gained a `STATIC_EXPORT=true` mode: `output: "export"`,
+    `trailingSlash`, unoptimized images, and no `headers()` (unsupported in export).
+    The default build is unchanged, so ISR/SSR stays available for the real target.
+  - `NEXT_PUBLIC_BASE_PATH=/teleambiente` for project-site hosting; `app/src/lib/asset.ts`
+    prefixes public assets because `next/image` does not under `output: export`.
+  - "Now" moved to the browser: `lib/clock.ts` (`nowMs`, `floorToMinute`) +
+    `lib/use-now.ts` (`useSyncExternalStore`, 30 s tick, server snapshot = baked time so
+    hydration cannot mismatch). New client views: `on-air-panel`, `live-page-body`;
+    `on-air-bar` and `programme-grid` became client components taking `initialNow`.
+  - Static search: `scripts/dev/build-search-index.mjs` writes
+    `app/public/search-index.json` (1,000 latest posts); `/cerca` filters it client-side
+    (the WP REST API sends no CORS header, so the browser cannot query it directly).
+  - `generateStaticParams` on `/[slug]` prerenders the latest 40 articles in export mode.
+  - `.github/workflows/pages.yml`: pnpm 11 / Node 24, build search index, export, deploy.
+  - `app/src/app/icon.svg` — the missing favicon the render probe flagged as a 404.
+  - `scripts/dev/shot.mjs` now reports console errors and uncaught exceptions.
+- Files: `app/next.config.ts`, `app/src/lib/{clock,use-now,asset}.ts`,
+  `app/src/components/{on-air-panel,live-page-body}.tsx`, `app/src/app/{cerca,[slug]}/*`,
+  `scripts/dev/{shot,build-search-index}.mjs`, `.github/workflows/pages.yml`,
+  `app/src/app/icon.svg`, `.gitignore`.
+- Decided: no `export const revalidate` anywhere — segment configs must be static literals,
+  and `process.env` gating fails the build. Caching returns with the Vercel target.
+- Verified: `pnpm typecheck` clean, 32/32 tests, `pnpm lint` clean (React purity and
+  set-state-in-effect rules now pass), both builds succeed; export served from a
+  `/teleambiente/` subpath renders with correct font/image/icon URLs, no horizontal
+  overflow, one `<h1>`, and **zero console errors** (no hydration mismatch).
+- Open: the Pages run itself, and the static-export limits (40 articles, no ISR) become
+  moot once the Vercel + CMS target lands at M5.

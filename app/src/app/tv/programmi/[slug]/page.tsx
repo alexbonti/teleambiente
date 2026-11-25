@@ -5,7 +5,6 @@ import { StoryItem } from "@/components/story";
 import { content } from "@/lib/content";
 import { PROGRAMMES, SLOTS, WEEKDAYS, toMinutes } from "@/lib/schedule";
 
-export const revalidate = 300;
 
 export function generateStaticParams() {
   return Object.keys(PROGRAMMES).map((slug) => ({ slug }));

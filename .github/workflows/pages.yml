@@ -1,0 +1,61 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  # The preview is a static export served from https://<owner>.github.io/teleambiente/.
+  STATIC_EXPORT: "true"
+  NEXT_PUBLIC_BASE_PATH: /teleambiente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Search index for the static preview
+        run: node scripts/dev/build-search-index.mjs
+
+      - name: Build static site
+        run: pnpm build
+
+      - name: Disable Jekyll processing
+        run: touch app/out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

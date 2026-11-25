@@ -1,107 +1,149 @@
 # teleambiente — agent field guide
 
-Read this first, then `docs/WORKLOG.md` for what has already been done and decided.
-If this guide disagrees with scripts or tests, trust the executable source and fix the guide.
+Rebuild of **TeleAmbiente** (teleambiente.tv), the Italian environmental TV channel
+(DTT ch. 221 national, ch. 18 Lazio/Umbria, on air since 1991), as a video-first
+newsroom with an owned audience. Read this first, then `docs/WORKLOG.md`; if this guide
+disagrees with a script or test, trust the executable source and fix the guide.
 
 ## What this is
 
-`TODO(verify)`: product definition is still being decided (as of 2026-11-25 the repo
-contained only a two-line README). Do not assume a stack or a scope from the repo name
-alone. The name matches the Italian environmental broadcaster TeleAmbiente
-(teleambiente.tv); confirm with the owner whether this project serves that brand, an
-environmental-data product, or something else before scaffolding.
+Phase 1 = **audit → strategy → design → prototype**. The live site is untouched: no
+deploys, no DNS, no CMS purchase before Gate 2. The repository holds the audit
+evidence, the design system and a Next.js prototype that renders real content from the
+current WordPress API.
 
-- Owner: Alessio Bonti (`alexbonti` on GitHub).
-- Stack: undecided — pick in the first scope decision and record why in `docs/WORKLOG.md`.
-- Entry points: none yet.
-- Primary outputs: none yet.
+- Stack: Next.js 16.4.6 · React 19.3.1 · TypeScript 6.0.3 · Tailwind 4.3.5 · Zod 4.6.7 ·
+  Vitest 5.1.2 · pnpm 11.5 workspace (`app/` is the only package).
+- Entry points: `app/src/app` (routes) · `app/src/lib/content` (content adapter) ·
+  `scripts/audit` (evidence crawlers).
+- Primary outputs: the prototype, `data/audit/*` (committed evidence) and `docs/*`.
 
 ## Commands
 
-Nothing is installable or runnable yet. When the first code lands, replace this block
-with the real commands and delete the TODO:
+Verified 2026-11-25 on Node 24.15.0 / pnpm 11.5.0:
 
 ```bash
-TODO(verify): install command
-TODO(verify): dev / run command
-TODO(verify): typecheck command
-TODO(verify): test command
-TODO(verify): build command
-TODO(verify): lint command
+pnpm install            # ~20 s; caches stay inside the repo (see .npmrc)
+pnpm dev                # http://localhost:3000
+pnpm typecheck          # tsc --noEmit, clean
+pnpm test               # vitest run — 7 tests / 1 file
+pnpm lint               # eslint (flat config), clean
+pnpm build              # next build (Turbopack), 3 static routes
+pnpm audit:all          # crawl.mjs + weight.mjs -> data/audit/*; ~3 min, needs network
 ```
 
-End-to-end truth will be the test + build pair; note anything slow or requiring services.
+End-to-end truth is `pnpm typecheck && pnpm test && pnpm lint && pnpm build`. The audit
+scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers there.
 
 ## Read order by task
 
 | Task | Read first |
 | --- | --- |
-| Understand what has been done / why | `docs/WORKLOG.md` (newest entries are at the bottom) |
-| Add the first code | this file, then `docs/WORKLOG.md` — confirm scope before creating structure |
-| Ship a task | `docs/WORKLOG.md` "Entry format" section, then the last 3 entries |
+| What the current site actually is | `docs/audit/digital-footprint.md`, then `data/audit/summary.json` |
+| Competitive/market context | `docs/audit/benchmark.md` |
+| Build or change a template | this file → `app/src/lib/content/types.ts` → `app/src/app/page.tsx` |
+| Change the content source (WP → CMS) | `app/src/lib/content/index.ts` + `wp.ts` (the adapter is the seam) |
+| Plan the migration / URLs | `docs/tech/architecture.md`, `docs/design/ia-and-content-model.md` |
+| Pick up any work | `docs/WORKLOG.md` — newest entry at the bottom |
 
 ## Architecture map
 
-Empty. Add one row per area as soon as directories exist; this table is a map of
-responsibilities, not a file inventory.
-
 | Path / area | Responsibility |
 | --- | --- |
-| `docs/` | Agent memory: worklog and future deep docs |
+| `app/src/app` | Routes (App Router). Home today; 8 templates from M4. |
+| `app/src/lib/content/types.ts` | Domain model (`Article`, `Author`, `HubRef`, `ContentImage`) — the template contract |
+| `app/src/lib/content/wp.ts` | WordPress REST adapter: fetch + pure `mapWpPost` mapper |
+| `app/src/lib/content/index.ts` | `content` switchboard — the only place a source is chosen |
+| `app/src/lib/content/html.ts` | Entity decode, tag strip, YouTube id / first image extraction |
+| `scripts/audit` | Reproducible crawlers: `crawl.mjs`, `weight.mjs`, shared `lib.mjs` |
+| `data/audit` | Committed evidence: `urls.csv` (26,272 URLs), `sample.csv`, `summary.json`, `weight.json` |
+| `docs/audit` | Digital-footprint audit + benchmark |
+| `docs/strategy`, `docs/design`, `docs/tech` | Strategy, IA/design system, architecture & migration (M2–M5) |
+| `.dsh/skills/` | Project agent tooling (unrelated to the product) |
 
 ## Hard contracts
 
-1. **Memory is mandatory.** Every completed task ends with an entry appended to
-   `docs/WORKLOG.md` (format below) *and*, if a command, path, contract or trap changed,
-   an edit to this guide — in the same change, before reporting back. A task without a
-   worklog entry is not done.
-2. **Worklog is append-only.** Never edit or delete past entries to make history look
-   tidier. Supersede a wrong entry with a new one that says `Supersedes: <date> — <title>`.
-3. **No unverified claims.** Only write that a check passed if it was actually run; record
-   the command and its result. Otherwise write `not run`.
-4. **Record decisions with reasons.** A choice that a future agent could reasonably
-   reverse (stack, data source, schema, dependency) needs one line of *why* in the entry.
-5. **No secrets, credentials, customer data or machine-specific absolute paths** in the
-   repo or in memory files.
-6. **Scope before structure.** Do not scaffold a framework before the product scope is
-   agreed and recorded in the worklog.
+1. **Memory is mandatory.** Every completed task appends an entry to
+   `docs/WORKLOG.md`; if a command, path, contract or trap changed, update this guide in
+   the same change. A task without a worklog entry is not done.
+2. **Worklog is append-only.** Correct by adding a `Supersedes:` entry, never by editing
+   history.
+3. **No unverified claims.** Record the command and its result; otherwise write
+   `not run`. Estimates get the word "estimate"; unverifiable facts get `UNVERIFIED`.
+4. **Article URLs are permanent.** Every existing `https://teleambiente.tv/{slug}/` must
+   keep resolving. Never change an article slug; new sections use new paths with 301s.
+5. **Templates never call WordPress.** All content flows through
+   `@/lib/content`. Swapping the source (M5) must not touch a template.
+6. **Taxonomy rule.** Hubs are topics; `video`, `intervista`, `dossier`, `live` are
+   formats. Never reintroduce format categories such as `Featured`, `Senza Categoria`,
+   `Video`.
+7. **Performance budget** (enforced from M4 by Lighthouse CI): Home ≤ 1.5 MB images,
+   JS ≤ 150 KB gzip, LCP < 2.0 s on throttled mobile 4G, CLS < 0.05.
+8. **Accessibility floor:** WCAG 2.2 AA — one `<h1>` per page, visible focus ring,
+   44 px touch targets, no colour-only state.
+9. **No secrets, credentials, customer data or machine-specific absolute paths** in the
+   repo, docs or data.
+10. **Caches live in the repo.** The sandbox cannot write to `$HOME`; `.npmrc` pins the
+    pnpm store and npm cache under `.cache/`. Do not "fix" that by deleting `.npmrc`.
 
 ## Conventions
 
-- Keep memory files in `docs/` so the root stays clean.
-- One task = one worklog entry. If a task spans several sessions, extend the open entry
-  rather than starting a new one.
-- Absolute truth for "what is the current state" is the newest worklog entry plus the
-  real files — chat history is not memory.
+- Everything the prototype shows comes from the real API; no lorem ipsum and no mock
+  articles in shipped templates.
+- `data/audit/*` is evidence, not scratch: regenerate with `pnpm audit:all` instead of
+  editing.
+- Docs are Italian-client-facing or English-engineering; keep quotes and numbers in the
+  language of their source.
+- One task = one worklog entry; extend an open entry rather than starting a new one.
 
 ## Verification
 
-- Fast loop: none yet (no code).
-- Before handoff or milestone: re-read the newest worklog entry, run the commands this
-  guide lists, and correct anything stale.
-- Last verified 2026-11-25: repo is greenfield; nothing to run.
+- Fast loop: `pnpm typecheck && pnpm test` (≈ 5 s).
+- Before handoff/milestone: `pnpm lint && pnpm build && pnpm audit:all`; then re-read the
+  newest worklog entry and correct anything stale in this guide.
+- Last verified 2026-11-25: typecheck clean, 7/7 tests pass, lint clean, build emits 3
+  static routes, audit produced 26,272 sitemap URLs and 5 template weight reports.
 
 ## Gotchas
 
-- The repo was empty apart from `README.md` at kickoff, so every command in this guide is
-  a placeholder — do not copy them as if they work.
-- `README.md` is a stub (`# teleambiente` / `ta`); do not treat it as documentation.
-- The local directory is a fresh clone on `main`; there are no other branches.
-- Do not invent a product from the repo name — scope is pending explicit confirmation.
+- **TypeScript 7 breaks lint.** `typescript-eslint` refuses TS ≥ 7 (`does not support TS
+  7.0`), so `typescript` is pinned to 6.0.3. Do not bump without checking that
+  `eslint-config-next` supports it.
+- **`npm`/`pnpm` without the repo-local cache fail** (`EACCES` on `~/.npm`): keep
+  `.npmrc` and run installs from the repo root. `pnpm install` also appends
+  `minimumReleaseAgeExclude` entries to `pnpm-workspace.yaml` — commit them.
+- **The build fetches the live WordPress API** (ISR, `revalidate=300`). Building offline
+  yields the fallback UI; `page.tsx` catches the error on purpose.
+- **The host WAF (BitNinja) rate-limits.** Audit scripts use concurrency ≤ 6 with a
+  delay; keep it polite.
+- **Category URLs live at `/categorie/{slug}/`.** `/attualita/` is a 404; do not infer
+  paths from category slugs.
+- **PageSpeed Insights API quota is exhausted** for this project: measure with local
+  Lighthouse/Chrome instead, or the weight tables in `data/audit/weight.json`.
+- **Sitemap counts ≠ content counts**: 26,272 URLs advertised = 11,744 posts + 14,463 tag
+  URLs + 47 categories + 5 pages + 13 authors. The API reports 11,917 posts and 43,950
+  tags; treat the sitemap as the crawl surface, not the archive.
+- `docs/audit/` numbers are dated 2026-11-25 — re-run `pnpm audit:all` before quoting
+  them later.
 
 ## Recent milestones (newest first, max 5)
 
+- 2026-11-25 — M0+M1: Next.js prototype scaffold with a WordPress content adapter,
+  reproducible audit harness, digital-footprint and benchmark docs.
+- 2026-11-25 — Product scope agreed: rebrand/rebuild teleambiente.tv + business strategy.
 - 2026-11-25 — Repo cloned; agent memory initialized (`AGENTS.md` + `docs/WORKLOG.md`).
 
 ## Docs index
 
-- `README.md` — stub, to be written once the product is defined.
-- `docs/WORKLOG.md` — append-only task history, decisions and open threads. Start here
-  when picking up work.
-- Deep docs (design, architecture, ADRs): none yet; add and point here as they appear.
+- `README.md` — what the repo is, layout, quick start.
+- `docs/WORKLOG.md` — append-only task history, decisions and open threads.
+- `docs/audit/digital-footprint.md` — measured state of the current site (evidence).
+- `docs/audit/benchmark.md` — Italian environmental media peers + market data.
+- `docs/strategy/`, `docs/design/`, `docs/tech/` — filled at M2–M5.
+- Deep design docs: none yet; add and point here as they appear.
 
 ## Keeping this guide useful
 
-Target 120–180 lines. Update at every milestone and delete stale detail instead of
-growing the file. Deep design belongs in `docs/`; this guide is the map, the contracts
-and the traps.
+Target 120–180 lines. Update at every milestone; delete stale detail instead of growing
+the file. Deep design belongs in `docs/`; this guide is the map, the contracts and the
+traps.

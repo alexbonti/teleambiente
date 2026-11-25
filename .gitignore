@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+.next/
+out/
+dist/
+coverage/
+
+# local caches (the sandbox forbids writing outside the workspace, so npm/pnpm
+# caches live here — see .npmrc)
+.cache/
+.npm/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# tooling state
+.impeccable/config.local.json
+.vercel/
+
+# os
+.DS_Store

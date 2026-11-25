@@ -1,0 +1,401 @@
+{
+  "generatedAt": "2026-11-25T14:32:41.198Z",
+  "site": "https://teleambiente.tv",
+  "templates": [
+    {
+      "name": "home",
+      "url": "https://teleambiente.tv/",
+      "htmlBytes": 214705,
+      "status": 200,
+      "ttfbMs": 177,
+      "requests": 152,
+      "measuredBytes": 17484904,
+      "measuredMb": 16.67,
+      "byKind": {
+        "js": {
+          "requests": 16,
+          "kb": 134,
+          "unknownSize": 1
+        },
+        "css": {
+          "requests": 37,
+          "kb": 75,
+          "unknownSize": 2
+        },
+        "image": {
+          "requests": 99,
+          "kb": 16867,
+          "unknownSize": 0
+        }
+      },
+      "heaviest": [
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer.png",
+          "kb": 2004,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente.png",
+          "kb": 1877,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/IL-PUNTO-GRAFICHE-8.png",
+          "kb": 1127,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer-1024x495.png",
+          "kb": 1126,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/MISURE-SITO-WEB-58.png",
+          "kb": 1045,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Riserva-Naturale-della-Valle-dei-Casali-Caratteristiche-2.jpg",
+          "kb": 689,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer-768x372.png",
+          "kb": 649,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/MISURE-SITO-WEB-58-1024x495.png",
+          "kb": 587,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-2048x1264.png",
+          "kb": 532,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/IL-PUNTO-GRAFICHE-8-1024x576.png",
+          "kb": 517,
+          "kind": "image"
+        }
+      ]
+    },
+    {
+      "name": "hub",
+      "url": "https://teleambiente.tv/categorie/attualita/",
+      "htmlBytes": 97955,
+      "status": 200,
+      "ttfbMs": 88,
+      "requests": 83,
+      "measuredBytes": 9850411,
+      "measuredMb": 9.39,
+      "byKind": {
+        "js": {
+          "requests": 14,
+          "kb": 119,
+          "unknownSize": 1
+        },
+        "css": {
+          "requests": 27,
+          "kb": 56,
+          "unknownSize": 2
+        },
+        "image": {
+          "requests": 42,
+          "kb": 9444,
+          "unknownSize": 3
+        }
+      },
+      "heaviest": [
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer.png",
+          "kb": 2004,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente.png",
+          "kb": 1877,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer-1024x495.png",
+          "kb": 1126,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Riserva-Naturale-della-Valle-dei-Casali-Caratteristiche-2.jpg",
+          "kb": 689,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer-768x372.png",
+          "kb": 649,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-2048x1264.png",
+          "kb": 532,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-1536x948.png",
+          "kb": 361,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-1024x632.png",
+          "kb": 208,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Riserva-Naturale-della-Valle-dei-Casali-Caratteristiche-2-1024x685.jpg",
+          "kb": 145,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-768x474.png",
+          "kb": 144,
+          "kind": "image"
+        }
+      ]
+    },
+    {
+      "name": "article",
+      "url": "https://teleambiente.tv/intelligenza-artificiale-opportunita-natura-video/",
+      "htmlBytes": 114878,
+      "status": 200,
+      "ttfbMs": 79,
+      "requests": 70,
+      "measuredBytes": 2752075,
+      "measuredMb": 2.62,
+      "byKind": {
+        "js": {
+          "requests": 14,
+          "kb": 119,
+          "unknownSize": 1
+        },
+        "css": {
+          "requests": 34,
+          "kb": 25,
+          "unknownSize": 9
+        },
+        "image": {
+          "requests": 22,
+          "kb": 2543,
+          "unknownSize": 9
+        }
+      },
+      "heaviest": [
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente.png",
+          "kb": 1877,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-768x474.png",
+          "kb": 144,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/parco-nazionale-degli-iblei-alfonso-pecoraro-scanio.jpg",
+          "kb": 121,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/parco-nazionale-degli-iblei-alfonso-pecoraro-scanio-1024x495.jpg",
+          "kb": 88,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/caccia-avs-proposta-di-legge-1024x495.jpg",
+          "kb": 75,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/parco-nazionale-degli-iblei-alfonso-pecoraro-scanio-768x372.jpg",
+          "kb": 56,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/caccia-avs-proposta-di-legge-768x372.jpg",
+          "kb": 50,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-300x185.png",
+          "kb": 42,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Giornata-contro-la-violenza-sulle-donne-in-Italia-64-milioni-di-vittime-le-iniziative-a-Roma-e-Milano.jpg",
+          "kb": 31,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-includes/js/jquery/jquery.min.js?ver=3.7.1",
+          "kb": 30,
+          "kind": "js"
+        }
+      ]
+    },
+    {
+      "name": "live",
+      "url": "https://teleambiente.tv/diretta-streaming/",
+      "htmlBytes": 102265,
+      "status": 200,
+      "ttfbMs": 80,
+      "requests": 85,
+      "measuredBytes": 7590234,
+      "measuredMb": 7.24,
+      "byKind": {
+        "js": {
+          "requests": 21,
+          "kb": 204,
+          "unknownSize": 4
+        },
+        "css": {
+          "requests": 22,
+          "kb": 27,
+          "unknownSize": 6
+        },
+        "image": {
+          "requests": 42,
+          "kb": 7181,
+          "unknownSize": 8
+        }
+      },
+      "heaviest": [
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer.png",
+          "kb": 2004,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente.png",
+          "kb": 1877,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer-1024x495.png",
+          "kb": 1126,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer-768x372.png",
+          "kb": 649,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/parco-nazionale-degli-iblei-alfonso-pecoraro-scanio.jpg",
+          "kb": 121,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/intelligenza-artificiale-natura-alberto-testolin.jpg",
+          "kb": 108,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Emanuela-Evangelista-diventa-National-Geographic-Explorer-300x145.png",
+          "kb": 103,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/COP31-falliti-i-negoziati-ad-Antalya.jpg",
+          "kb": 98,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/ddl-caccia-camera.jpg",
+          "kb": 90,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/parco-nazionale-degli-iblei-alfonso-pecoraro-scanio-1024x495.jpg",
+          "kb": 88,
+          "kind": "image"
+        }
+      ]
+    },
+    {
+      "name": "schedule",
+      "url": "https://teleambiente.tv/palinsesto-televisivo/",
+      "htmlBytes": 137419,
+      "status": 200,
+      "ttfbMs": 505,
+      "requests": 80,
+      "measuredBytes": 2213510,
+      "measuredMb": 2.11,
+      "byKind": {
+        "js": {
+          "requests": 12,
+          "kb": 81,
+          "unknownSize": 7
+        },
+        "css": {
+          "requests": 22,
+          "kb": 19,
+          "unknownSize": 12
+        },
+        "image": {
+          "requests": 46,
+          "kb": 2062,
+          "unknownSize": 9
+        }
+      },
+      "heaviest": [
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-2048x1264.png",
+          "kb": 532,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-1536x948.png",
+          "kb": 361,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-1024x632.png",
+          "kb": 208,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-768x474.png",
+          "kb": 144,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Progetto-senza-titolo-3-2048x2048.jpg",
+          "kb": 127,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Progetto-senza-titolo-3-1536x1536.jpg",
+          "kb": 86,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/04/PwrAction.jpg",
+          "kb": 50,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/11/Progetto-senza-titolo-3-1024x1024.jpg",
+          "kb": 48,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2025/03/Logo-TeleAmbiente-300x185.png",
+          "kb": 42,
+          "kind": "image"
+        },
+        {
+          "url": "https://teleambiente.tv/wp-content/uploads/2026/04/CentomilaVoci.jpg",
+          "kb": 38,
+          "kind": "image"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-11-25T14:32:38.365Z",
+  "site": "https://teleambiente.tv",
+  "sitemap": {
+    "childSitemaps": 136,
+    "urlsByType": {
+      "author": 13,
+      "category": 47,
+      "page": 5,
+      "post": 11744,
+      "tag": 14463
+    },
+    "urlsTotal": 26272
+  },
+  "sample": {
+    "pages": 93,
+    "ok": 93,
+    "notOk": 0,
+    "avgHtmlBytes": 109111,
+    "avgTtfbMs": 1052,
+    "indexable": 92,
+    "noindex": 1,
+    "missingH1": 9,
+    "notSelfCanonical": 1,
+    "avgScripts": 27,
+    "avgStylesheets": 31,
+    "schemaTypes": [
+      "Article",
+      "CollectionPage",
+      "ImageObject",
+      "Organization",
+      "Person",
+      "ProfilePage",
+      "SearchAction",
+      "SearchResultsPage",
+      "VideoObject",
+      "WebPage",
+      "WebSite"
+    ]
+  }
+}

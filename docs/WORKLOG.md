@@ -52,3 +52,119 @@ or the chat.
     Do not scaffold until that description arrives.
   - Then: choose the stack, record the reason here, and write the first vertical slice.
   - `README.md` is still a stub and needs a real description once scope is known.
+
+---
+
+## 2026-11-25 — Satirical fake-news skill (`fake-news-comedy`)
+
+- Status: done
+- Goal: Build a reusable skill that turns a user-chosen trending topic into a funny,
+  clearly labeled fake-news article, gated on two user checks: pick the topic, then
+  approve the pitch before any writing happens.
+- Did:
+  - Added the project skill bundle `.dsh/skills/fake-news-comedy/`: `SKILL.md` (the two
+    checkpoints, workflow, article skeleton, five self-checks, failure modes) plus
+    `reference/research.md` (trend radar, search recipes, fact/fiction ledger, the
+    "comedy seam"), `reference/craft.md` (headline formulas, quote ladder, escalation,
+    kicker types, formats), `reference/safety.md` (satire labeling, real-vs-fake rules,
+    punching up, actionable-content and raw-news rules) and `examples/worked-example.md`
+    (a full trend → pitch → article pass).
+  - Checkpoint 1 asks for the topic, or pitches three trending candidates when the user
+    says "you pick". Checkpoint 2 shows a pitch card — real trend with link, the absurd
+    premise, real facts kept vs fiction invented, format/language/length, risk check —
+    and stops until the user approves. Writing starts only after that approval.
+  - Updated `AGENTS.md`: architecture-map row for `.dsh/skills/`, a read-order row for
+    using or editing project skills, and a milestone line.
+  - Cold-run audit by a separate fresh-context agent (it loaded the skill through the
+    `skill` tool, read all four reference files and dry-ran both checkpoints). Fixed its
+    findings: the named-topic exception now says "go straight into research in that same
+    turn" instead of colliding with "do not research in the same turn"; the shrunken
+    pitch is defined as headline + trend/link + premise with format; a no-search/no-link
+    fallback with evergreen labeling was added; the risk line now points at a five-item
+    checklist in `reference/safety.md`; and `reference/craft.md` now asks for contrasting
+    quote registers instead of one terse sentence everywhere.
+- Files: `.dsh/skills/fake-news-comedy/SKILL.md`,
+  `.dsh/skills/fake-news-comedy/reference/{research,craft,safety}.md`,
+  `.dsh/skills/fake-news-comedy/examples/worked-example.md`, `AGENTS.md`,
+  `docs/WORKLOG.md`
+- Decided: The skill lives in this repo (`.dsh/skills/`, the project-scope root, with
+  `user-invocable: true`) instead of the global `~/.dsh/skills/`, because the session
+  sandbox only permits workspace writes; copy the directory to `~/.dsh/skills/` to make
+  it available in every project. Left model-invocable so a plain request like "write an
+  Onion-style piece" triggers it. Kept it out of the product architecture — it is
+  tooling, not app scope.
+- Verified: frontmatter parsed with the DSH loader's own `yaml` package and checked
+  against the rules in `dsh-skill-filesystem` — `name: fake-news-comedy` matches
+  `^[a-z0-9]+(-[a-z0-9]+)*$`, description non-empty (392 chars), 141-line file; no
+  loader warnings. The session's live skill catalog refreshed twice (on creation and
+  after the description edit) and listed `fake-news-comedy`, so `.dsh/skills/`
+  discovery works without restarting the session. A fresh-context subagent then loaded
+  the skill through the `skill` tool: it reported the skill listed and loadable, that
+  Checkpoint 1 emits only the topic question, and that the write gate blocks until an
+  explicit approval token — and its four reported gaps were fixed before this entry was
+  closed.
+- Open / next: product scope is still undefined; this skill is standalone tooling,
+  unrelated to the app. Move it to `~/.dsh/skills/fake-news-comedy/` if the owner wants
+  it in every project (requires approval outside the workspace).
+
+## 2026-11-25 — M0 + M1: prototype scaffold, audit harness, digital-footprint audit
+
+- Status: done
+- Goal: Start Phase 1 of the TeleAmbiente rebuild — evidence first. Stand up the repo,
+  make the current site's footprint reproducible, and publish the audit that drives the
+  strategy and design.
+- Did:
+  - Agreed the engagement with the owner: revamp the website **and** the business
+    strategy; migrate off WordPress; audience growth first; research/strategy/design
+    before any production build. Full Phase 1 plan approved by the owner.
+  - Scaffolded a pnpm workspace with one Next.js 16 app (`app/`): App Router,
+    TypeScript, Tailwind 4 tokens seeded from the existing logo palette, ESLint flat
+    config, Vitest.
+  - Built the content seam: `app/src/lib/content/{types,html,wp,index}.ts` — Zod domain
+    model, pure `mapWpPost`, WordPress REST adapter, single switchboard. Templates never
+    touch the CMS, so the M5 migration is implementation-only.
+  - Wrote the evidence harness: `scripts/audit/{lib,crawl,weight}.mjs` — parses the whole
+    sitemap graph (136 child sitemaps), crawls a deterministic 93-page sample, and
+    measures every asset of the five key templates.
+  - Wrote the audit: `docs/audit/digital-footprint.md` (measured) and
+    `docs/audit/benchmark.md` (Italian environmental media peers, verified market data,
+    explicit UNVERIFIED list).
+- Files: `package.json`, `pnpm-workspace.yaml`, `.npmrc`, `.gitignore`, `README.md`,
+  `app/**` (config, `src/app`, `src/lib/content`), `scripts/audit/*`,
+  `data/audit/{urls.csv,sample.csv,summary.json,weight.json}`,
+  `docs/audit/{digital-footprint,benchmark}.md`, `AGENTS.md`, `docs/WORKLOG.md`
+- Decided:
+  - **Platform target: Next.js + Sanity (EU) + Vercel, images via Sanity CDN**, with a
+    documented fallback (Payload 3 + Postgres + R2) decided at Gate 2. Why: an 11-person
+    cooperative cannot carry a self-hosted CMS migration; the newsroom needs hosted
+    editing, previews and roles; the image CDN solves 47k mis-sized assets at once.
+  - **Prototype reads the live WordPress API** behind the adapter (not fixtures), so the
+    design is validated against real articles, hubs and video.
+  - **URL policy: article slugs unchanged**; `/categorie/*` → hubs, 5 page paths
+    redirected, tags become metadata (`noindex`, out of sitemaps), date archives 410.
+  - **TypeScript pinned to 6.0.3**, not 7.0.2: `typescript-eslint` refuses TS ≥ 7, and
+    lint is a required gate.
+  - **Package caches moved inside the repo** (`.npmrc`): the agent sandbox cannot write
+    to `$HOME`, so default npm/pnpm caches fail with EACCES.
+- Verified (2026-11-25, Node 24.15.0 / pnpm 11.5.0):
+  - `pnpm typecheck` → clean; `pnpm test` → 7/7 pass; `pnpm lint` → clean;
+    `pnpm build` → Turbopack build, 3 static routes, homepage prerendered from the real
+    WordPress API.
+  - `pnpm audit:all` → 136 child sitemaps, 26,272 advertised URLs (11,744 posts, 14,463
+    tag URLs, 47 categories, 5 pages, 13 authors); 93/93 sampled pages HTTP 200; 9 pages
+    missing `<h1>`; Home 152 requests / **16.67 MB** (99 images = 16.5 MB), hub 9.39 MB,
+    live 7.24 MB, article 2.62 MB, schedule 2.11 MB.
+  - Content inventory via WP API: 11,917 posts since 2017-08-01, 1,671 posts in the last
+    12 months, 47,038 media, 43,950 tags, 51 categories, 16 users, 5 pages; post bodies
+    are clean HTML (no Elementor in content).
+  - Distribution: YouTube 27.3K subs / 8.6K videos / ~4.3 uploads per day; Instagram
+    102K; Facebook 62,166; Spotify dormant since 2023-07-28; no newsletter, no WhatsApp.
+- Open / next:
+  - **Blocking for the baseline:** GA4 (`G-J85DWXR9TH`) and Search Console access. Until
+    then `data/baseline/` is empty and every KPI is relative, not absolute.
+  - Brand files needed: vector logo, font licences, programme logos, 10–15 usable photos.
+  - Two interviews: director (positioning) and commercial lead (current partner deals).
+  - M2: `docs/strategy/business-strategy.md` + `docs/strategy/kpis.md` → Gate 1.
+  - M3: `docs/design/ia-and-content-model.md` + `data/redirects.csv` + validator.
+  - Lighthouse numbers still missing (PageSpeed API quota exhausted) — run local
+    Lighthouse before M4 budgets are enforced.

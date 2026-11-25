@@ -185,6 +185,9 @@ scripts are the truth for every figure in `docs/audit/`: never hand-edit numbers
   Instagram blockquotes that die without their script, and auto-excerpts end in `[...]`:
   `stripLeadingDek` / `replaceSocialEmbeds` / `cleanDek` in `content/html.ts` exist for this
   and are unit-tested. Do not remove them to "simplify" the article template.
+- **The shared task board is session state, not repo state** (`team_task_list` → `[]` in a
+  fresh session, ids change), so the durable plan lives in `docs/WORKLOG.md`. **Fixes go
+  PR-first**: `main` is unprotected, but `pages.yml` redeploys the preview on every push.
 
 ## Recent milestones (newest first, max 5)
 

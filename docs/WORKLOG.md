@@ -338,3 +338,45 @@ or the chat.
   M4-Lighthouse, M4-DESIGN.md, Pages preview, brand assets.
 - Open / next: the two owner-side items (analytics access, interviews) are the critical path;
   everything downstream is waiting on them or on Gate 1.
+
+---
+
+## 2026-11-25 — GitHub issue intake capability check and remaining-work audit
+
+- Status: done
+- Supersedes: 2026-11-25 — Phase 1 plan seeded on the shared task board (`Verified:` line only;
+  the plan itself stands). The shared board is session runtime state: a later session sees
+  `team_task_list` → `[]`, so "eleven pending tasks" is not a durable fact. The ready queue
+  below is the record until the board is re-seeded.
+- Goal: answer whether an agent can pick up and fix GitHub issues on this repo unattended, and
+  re-check the Phase 1 plan against what is actually in the working tree.
+- Did: read-only reconnaissance — no code, no product files changed.
+  - Verified the whole intake path (CLI, auth scopes, push rights, branch protection, issue
+    supply) and the two constraints that shape any fix loop: `main` is unprotected but
+    `.github/workflows/pages.yml` redeploys the Pages preview on every push, so fixes go
+    PR-first; and contracts #4/#5/#8/#10/#11 make some issue classes unsafe to automate
+    (article slugs, CMS seam, schedule grid, visual authority, accessibility floor).
+  - Re-audited the plan: confirmed the tree is green, listed what is still absent on disk.
+- Files: `docs/WORKLOG.md`, `AGENTS.md` (one Gotchas bullet).
+- Decided: no unattended fixer for now — a 24/7 loop needs an `issues`-triggered Actions
+  workflow plus an LLM key stored as an Actions secret (secret, not repo file, but still a new
+  billed surface) and the owner chose not to build it yet. Fix passes stay on demand and
+  PR-first. The task board was not re-seeded.
+- Verified (2026-11-25 16:25 CET):
+  - `gh` 2.93.0, authed as `alexbonti`, scopes `gist, read:org, repo, workflow`;
+    repo permissions → `admin`/`push` true; `branches/main/protection` → 404 "Branch not
+    protected"; `hasIssuesEnabled: true`.
+  - `gh issue list --state all` → `[]` (0 open, 0 closed); `gh pr list` → none; no
+    `.github/ISSUE_TEMPLATE/`; only the 10 default labels; `gh secret list` → empty.
+  - `pnpm typecheck` → clean; `pnpm test` → 32/32 pass (3 files).
+  - Absent on disk: `data/baseline/`, `data/redirects.csv`, `app/DESIGN.md`, `docs/strategy/`,
+    `docs/tech/`. `team_task_list` → `[]`.
+- Open / next:
+  - Ready, no owner input: M3 IA/URL model (`docs/design/ia-and-content-model.md`), local
+    Lighthouse for the still-unproven M4 budget, `DESIGN.md` from the built tokens, Pages
+    content refresh.
+  - Owner-side, critical path: GA4/Search Console access, the two discovery interviews, brand
+    assets, plus newsroom confirmation of the empty lunedì/domenica and the mercoledì 21:30
+    collision.
+  - The board does not persist across sessions: re-seed it from the entry above if a visible
+    queue is wanted, or keep working from this list.

@@ -28,3 +28,6 @@ app/next-env.d.ts
 
 # os
 .DS_Store
+
+# TypeScript incremental build info
+*.tsbuildinfo

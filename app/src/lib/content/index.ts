@@ -1,5 +1,13 @@
 import type { Article } from "./types";
-import { getArticleBySlug, getLatestArticles } from "./wp";
+import {
+  getArticleBySlug,
+  getArticlesByCategory,
+  getCategoryBySlug,
+  getHubs,
+  getLatestArticles,
+  searchArticles,
+  type Hub,
+} from "./wp";
 
 /**
  * Content source switchboard.
@@ -12,14 +20,23 @@ export interface ContentSource {
   readonly name: "wordpress" | "cms";
   getLatestArticles(limit?: number): Promise<Article[]>;
   getArticleBySlug(slug: string): Promise<Article | null>;
+  getArticlesByCategory(slug: string, limit?: number): Promise<Article[]>;
+  getHubs(): Promise<Hub[]>;
+  getCategoryBySlug(slug: string): Promise<Hub | null>;
+  searchArticles(query: string, limit?: number): Promise<Article[]>;
 }
 
 const wordpressSource: ContentSource = {
   name: "wordpress",
   getLatestArticles,
   getArticleBySlug,
+  getArticlesByCategory,
+  getHubs,
+  getCategoryBySlug,
+  searchArticles,
 };
 
 export const content: ContentSource = wordpressSource;
 
 export * from "./types";
+export type { Hub } from "./wp";

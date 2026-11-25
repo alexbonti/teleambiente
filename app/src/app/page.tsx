@@ -1,87 +1,254 @@
-import { content, type Article } from "@/lib/content";
+import Image from "next/image";
+import Link from "next/link";
 
-// The prototype reads the live WordPress API so the design is validated against
-// real content, never lorem ipsum. It revalidates instead of fetching per request.
+import { LeadStory, StoryItem } from "@/components/story";
+import { TodayGrid } from "@/components/programme-grid";
+import { content, type Article } from "@/lib/content";
+import { NAV_HUBS } from "@/lib/navigation";
+import { currentSlot, nextSlot } from "@/lib/schedule";
+
 export const revalidate = 300;
 
-async function loadArticles(): Promise<{ articles: Article[]; error: string | null }> {
-  try {
-    return { articles: await content.getLatestArticles(10), error: null };
-  } catch (error) {
-    // A prototype must render even when the upstream API is unreachable.
-    return { articles: [], error: error instanceof Error ? error.message : "unknown error" };
-  }
+async function load(): Promise<{ articles: Article[]; roma: Article[] }> {
+  const [latest, roma] = await Promise.allSettled([
+    content.getLatestArticles(18),
+    content.getArticlesByCategory("roma", 3),
+  ]);
+  return {
+    articles: latest.status === "fulfilled" ? latest.value : [],
+    roma: roma.status === "fulfilled" ? roma.value : [],
+  };
 }
 
 export default async function HomePage() {
-  const { articles, error } = await loadArticles();
+  const { articles, roma } = await load();
+  const lead = articles[0];
+  const secondary = articles.slice(1, 3);
+  const rest = articles.slice(3, 9);
+  const videos = articles.filter((article) => article.videoId !== null).slice(0, 4);
+
+  const live = currentSlot(new Date());
+  const upcoming = nextSlot(new Date());
 
   return (
-    <main className="mx-auto max-w-5xl px-5 py-10">
-      <p className="mb-6 inline-block border border-rule bg-surface-raised px-3 py-1 text-xs font-semibold uppercase tracking-widest text-ink-muted">
-        Prototipo interno · non indicizzato
-      </p>
+    <main>
+      <section className="page-shell grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_19.5rem] lg:gap-14">
+        <div>
+          {lead ? <LeadStory article={lead} level={1} /> : <h1 className="display-2">TeleAmbiente</h1>}
 
-      <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-ink">
-        TeleAmbiente
-      </h1>
-      <p className="mt-3 max-w-2xl text-lg text-ink-muted">
-        La nuova piattaforma editoriale: audit, strategia e design in corso. Questa pagina
-        verifica il collegamento con il contenuto reale del sito attuale.
-      </p>
-
-      {error ? (
-        <div className="mt-8 border-l-4 border-informational bg-surface-raised p-4 text-sm">
-          <p className="font-semibold">Content source unreachable</p>
-          <p className="mt-1 text-ink-muted">{error}</p>
-        </div>
-      ) : null}
-
-      <section aria-labelledby="latest" className="mt-12">
-        <h2 id="latest" className="text-sm font-semibold uppercase tracking-widest text-ink-muted">
-          Ultime notizie · {articles.length} articoli dal feed WordPress
-        </h2>
-
-        <ul className="mt-6 divide-y divide-rule border-y border-rule">
-          {articles.map((article) => (
-            <li key={article.id} className="py-5">
-              <article className="grid gap-1">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-wide text-ink-muted">
-                  {article.hubs.slice(0, 2).map((hub) => (
-                    <span key={hub.slug} className="font-semibold text-brand-deep">
-                      {hub.name}
-                    </span>
-                  ))}
-                  <time dateTime={article.publishedAt}>
-                    {new Date(article.publishedAt).toLocaleDateString("it-IT", {
-                      dateStyle: "medium",
-                    })}
-                  </time>
-                  {article.videoId ? <span>Video</span> : null}
+          {secondary.length > 0 ? (
+            <div className="mt-8 grid gap-6 border-t-2 border-ink pt-5 sm:grid-cols-2 sm:divide-x sm:divide-rule">
+              {secondary.map((article, index) => (
+                <div key={article.id} className={index === 1 ? "sm:pl-6" : "sm:pr-6"}>
+                  <StoryItem article={article} />
                 </div>
-                <h3 className="text-xl font-semibold leading-snug">
-                  <a
-                    className="decoration-brand decoration-2 underline-offset-4 hover:underline"
-                    href={article.url}
-                  >
-                    {article.title}
-                  </a>
-                </h3>
-                {article.dek ? (
-                  <p className="max-w-3xl text-ink-muted">{article.dek}</p>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <aside aria-labelledby="in-tv" className="border-t-2 border-ink pt-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 id="in-tv" className="label label-signal">
+              Adesso in TV
+            </h2>
+            <Link className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-channel hover:underline" href="/tv/diretta">
+              Diretta
+            </Link>
+          </div>
+
+          <div className="mt-3 bg-paper-deep p-4">
+            {live ? (
+              <>
+                <p className="flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-signal-ink">
+                  <span className="on-air-dot inline-block size-2 rounded-full bg-signal" aria-hidden="true" />
+                  In onda ora
+                </p>
+                <p className="mt-2 text-[1.35rem] font-bold leading-[1.05]">{live.programme.title}</p>
+                <p className="mt-1 text-[0.8125rem] text-ink-soft">
+                  Fino alle {live.endsAt} · canale 221
+                </p>
+                <Link
+                  className="mt-3 inline-flex items-center gap-2 border border-ink px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.1em] transition-colors hover:bg-ink hover:text-paper"
+                  href="/tv/diretta"
+                >
+                  <span aria-hidden="true">▶</span> Guarda
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="font-reading text-[1.02rem] leading-snug text-ink-soft">
+                  Nessun programma in onda adesso.
+                </p>
+                {upcoming ? (
+                  <p className="mt-2 text-[0.9375rem] leading-snug">
+                    <span className="font-semibold">A seguire:</span> {upcoming.programme.title},{" "}
+                    {upcoming.when} alle {upcoming.slot.start}
+                  </p>
                 ) : null}
-              </article>
-            </li>
-          ))}
-        </ul>
+              </>
+            )}
+          </div>
+
+          <h3 className="label mt-5">Oggi in televisione</h3>
+          <div className="mt-2">
+            <TodayGrid />
+          </div>
+          <Link
+            className="mt-3 inline-block text-[0.8125rem] font-semibold text-channel hover:underline"
+            href="/tv/palinsesto"
+          >
+            Palinsesto della settimana →
+          </Link>
+        </aside>
       </section>
 
-      <footer className="mt-12 border-t border-rule pt-6 text-sm text-ink-muted">
-        <p>
-          Fase 1 · M0. Dati: WordPress REST di teleambiente.tv, riletti ogni 300s. Vedi{" "}
-          <code className="text-ink">docs/WORKLOG.md</code> per lo stato del lavoro.
-        </p>
-      </footer>
+      <section aria-labelledby="notizie" className="border-y-2 border-ink">
+        <div className="page-shell py-7">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 id="notizie" className="text-[1.05rem] font-bold uppercase tracking-[0.08em]">
+              Le notizie
+            </h2>
+            <p className="text-[0.6875rem] uppercase tracking-[0.1em] text-ink-soft">
+              Aggiornamento continuo · {new Date().getFullYear()}
+            </p>
+          </div>
+          <div className="mt-2 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+            {rest.map((article) => (
+              <div key={article.id} className="border-t border-rule">
+                <StoryItem article={article} dense />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {videos.length > 0 ? (
+        <section aria-labelledby="video" className="page-shell py-8">
+          <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-2">
+            <h2 id="video" className="text-[1.05rem] font-bold uppercase tracking-[0.08em]">
+              Dal video
+            </h2>
+            <Link className="text-[0.75rem] font-semibold text-channel hover:underline" href="/temi/video">
+              Tutti i video →
+            </Link>
+          </div>
+          <ul className="mt-1 grid gap-x-8 sm:grid-cols-2">
+            {videos.map((article) => (
+              <li key={article.id} className="border-b border-rule py-3">
+                <Link className="group grid grid-cols-[8rem_1fr] items-start gap-4" href={`/${article.slug}`}>
+                  <Image
+                    src={
+                      article.heroImage?.url ??
+                      `https://i.ytimg.com/vi/${article.videoId}/hqdefault.jpg`
+                    }
+                    alt=""
+                    width={320}
+                    height={180}
+                    sizes="128px"
+                    className="aspect-video w-full border border-rule object-cover"
+                  />
+                  <span>
+                    <span className="block text-[1.02rem] font-semibold leading-snug group-hover:underline">
+                      {article.title}
+                    </span>
+                    <span className="mt-1 flex items-center gap-2 text-[0.75rem] uppercase tracking-[0.08em] text-ink-soft">
+                      <span className="font-bold text-channel">▶ Video</span>
+                      {article.hubs[0]?.name ?? ""}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {roma.length > 0 ? (
+        <section aria-labelledby="territorio" className="page-shell pb-8">
+          <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-2">
+            <h2 id="territorio" className="text-[1.05rem] font-bold uppercase tracking-[0.08em]">
+              Dal territorio
+            </h2>
+            <Link className="text-[0.75rem] font-semibold text-channel hover:underline" href="/temi/roma">
+              Roma &amp; Lazio →
+            </Link>
+          </div>
+          <div className="mt-1 grid gap-x-10 sm:grid-cols-3">
+            {roma.map((article) => (
+              <div key={article.id} className="border-b border-rule sm:border-b-0">
+                <StoryItem article={article} dense />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section aria-labelledby="temi" className="border-t border-rule bg-paper-deep">
+        <div className="page-shell grid gap-6 py-7 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <h2 id="temi" className="text-[1.05rem] font-bold uppercase tracking-[0.08em]">
+              Temi
+            </h2>
+            <p className="mt-2 max-w-[34ch] font-reading text-[0.95rem] leading-relaxed text-ink-soft">
+              Sei filoni, non sessanta categorie: l&apos;archivio riorganizzato per come si cerca
+              davvero l&apos;informazione ambientale.
+            </p>
+          </div>
+          <ul className="grid gap-y-2 sm:col-span-1 lg:col-span-2 lg:grid-cols-2 lg:gap-x-10">
+            {NAV_HUBS.map((hub) => (
+              <li key={hub.slug} className="border-b border-rule pb-2">
+                <Link className="group flex items-baseline justify-between gap-3" href={`/temi/${hub.slug}`}>
+                  <span className="text-[1rem] font-semibold group-hover:underline">{hub.name}</span>
+                  <span className="max-w-[22ch] text-right font-reading text-[0.8125rem] leading-snug text-ink-soft">
+                    {hub.blurb}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="newsletter" className="page-shell py-10">
+        <div className="grid gap-5 border-2 border-ink bg-signal-tint p-6 sm:grid-cols-[1fr_auto] sm:items-end sm:p-8">
+          <div>
+            <h2 id="newsletter" className="display-3 max-w-[24ch]">
+              Una volta a settimana, cosa conta davvero per il territorio.
+            </h2>
+            <p className="mt-2 max-w-[52ch] font-reading text-[0.95rem] leading-relaxed text-ink-soft">
+              La selezione della redazione: clima, Roma e Lazio, animali, scadenze ambientali. Niente
+              breaking news a raffica.
+            </p>
+          </div>
+          <form className="flex w-full flex-col gap-2 sm:w-80" aria-describedby="newsletter-note">
+            <label className="label" htmlFor="newsletter-email">
+              La tua email
+            </label>
+            <div className="flex">
+              <input
+                id="newsletter-email"
+                type="email"
+                required
+                disabled
+                placeholder="nome@esempio.it"
+                className="min-w-0 flex-1 border border-ink bg-paper px-3 py-2 text-[0.9375rem] disabled:opacity-60"
+              />
+              <button
+                type="submit"
+                disabled
+                className="border border-l-0 border-ink bg-ink px-4 py-2 text-[0.75rem] font-bold uppercase tracking-[0.1em] text-paper disabled:opacity-60"
+              >
+                Iscriviti
+              </button>
+            </div>
+            <p id="newsletter-note" className="text-[0.6875rem] leading-snug text-ink-soft">
+              Prototipo: modulo non attivo. La newsletter è la prima leva di pubblico proprietario
+              prevista dalla strategia.
+            </p>
+          </form>
+        </div>
+      </section>
     </main>
   );
 }

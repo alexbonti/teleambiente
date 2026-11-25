@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { cleanTitle, decodeEntities, extractFirstImage, extractYouTubeId, toPlainText } from "./html";
+import { cleanDek, cleanTitle, decodeEntities, extractFirstImage, extractYouTubeId, toPlainText } from "./html";
 import { type Article, ArticleSchema } from "./types";
 
 /**
@@ -138,7 +138,7 @@ export function mapWpPost(raw: unknown): Article {
     slug: post.slug,
     url: post.link,
     title: cleanTitle(post.title.rendered),
-    dek: post.excerpt?.rendered ? toPlainText(post.excerpt.rendered) : null,
+    dek: post.excerpt?.rendered ? cleanDek(toPlainText(post.excerpt.rendered)) : null,
     html,
     publishedAt: post.date,
     updatedAt: post.modified,
@@ -178,4 +178,68 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   const posts = z.array(z.unknown()).parse(payload);
   const first = posts[0];
   return first === undefined ? null : mapWpPost(first);
+}
+
+/* ------------------------------------------------------------------ */
+/* Categories (hubs)                                                   */
+/* ------------------------------------------------------------------ */
+
+const WpCategorySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().optional().default(""),
+  count: z.number(),
+  parent: z.number().optional().default(0),
+  link: z.string().optional().default(""),
+});
+export type Hub = z.infer<typeof WpCategorySchema> & { name: string };
+
+export async function getCategoryBySlug(slug: string): Promise<Hub | null> {
+  const url = new URL(`/wp-json/wp/v2/categories`, WP_BASE_URL);
+  url.searchParams.set("slug", slug);
+  const response = await fetch(url, {
+    headers: { accept: "application/json" },
+    next: { revalidate: REVALIDATE_SECONDS },
+  });
+  if (!response.ok) throw new Error(`WordPress categories ${response.status}`);
+  const payload = z.array(z.unknown()).parse(await response.json());
+  const parsed = payload.map((item) => WpCategorySchema.safeParse(item)).find((result) => result.success);
+  if (parsed === undefined || !parsed.success) return null;
+  return { ...parsed.data, name: decodeEntities(parsed.data.name) };
+}
+
+export async function getHubs(): Promise<Hub[]> {
+  const payload = await wpGet("/wp-json/wp/v2/categories", {
+    per_page: "100",
+    orderby: "count",
+    order: "desc",
+    hide_empty: "true",
+  });
+  const parsed = z.array(WpCategorySchema).parse(payload);
+  return parsed.map((category) => ({ ...category, name: decodeEntities(category.name) }));
+}
+
+export async function getArticlesByCategory(slug: string, limit = 12): Promise<Article[]> {
+  const category = await getCategoryBySlug(slug);
+  if (category === null) return [];
+  const payload = await wpGet("/wp-json/wp/v2/posts", {
+    categories: String(category.id),
+    per_page: String(Math.min(Math.max(limit, 1), 100)),
+  });
+  return z.array(z.unknown()).parse(payload).map(mapWpPost);
+}
+
+/* ------------------------------------------------------------------ */
+/* Search                                                             */
+/* ------------------------------------------------------------------ */
+
+export async function searchArticles(query: string, limit = 12): Promise<Article[]> {
+  const term = query.trim();
+  if (term.length < 2) return [];
+  const payload = await wpGet("/wp-json/wp/v2/posts", {
+    search: term,
+    per_page: String(Math.min(Math.max(limit, 1), 50)),
+  });
+  return z.array(z.unknown()).parse(payload).map(mapWpPost);
 }

@@ -168,3 +168,75 @@ or the chat.
   - M3: `docs/design/ia-and-content-model.md` + `data/redirects.csv` + validator.
   - Lighthouse numbers still missing (PageSpeed API quota exhausted) — run local
     Lighthouse before M4 budgets are enforced.
+
+## 2026-11-25 — M4: "Guida TV" design system and the 8-template prototype
+
+- Status: done (prototype), open threads below
+- Goal: stop designing in documents and build the new TeleAmbiente — a real, mobile-first,
+  Italian-language site on the existing Next.js shell, reading the live WordPress API,
+  with the live channel and the schedule as its first-class utility (owner's priority).
+- Did:
+  - **Direction contract (Impeccable roll, direction scope, operate mode).** Visual world is
+    drawn from the Italian *guida TV* and the broadcast slate, not from green-lifestyle
+    imagery: newsprint ground, one ink, one signal green (`#2CAD00` graphic only), channel
+    blue `#005CA5`; hairline rules as structure; a weekday rail and a fixed time column on
+    schedule surfaces; no cards, no shadows, no gradients, no eyebrows.
+  - **Design system in `app/src/app/globals.css`** (Tailwind 4 `@theme` tokens): paper/ink/
+    signal/channel palette, `Archivo` (variable, width axis used for the listings voice) and
+    `Source Serif 4` (reading) self-hosted from `app/src/fonts/`, `.display-1/2/3`, `.label`,
+    `.channel-badge`, `.prose-tv` (68ch, 1.62), themed selection/caret/scrollbars/focus.
+    One authored motion moment: the on-air dot pulse, disabled under reduced motion.
+  - **Shell and templates.** `site-header` (dateline, 221/18 badges, wordmark, client nav with
+    `aria-current`), `on-air-bar` (server-rendered "in onda / a seguire" from the grid in
+    Europe/Rome), `site-footer`; routes `/` (front page: lead + on-air panel + ruled news
+    bands + video rail + hubs + newsletter band), `/tv/diretta` (HLS player with hls.js
+    loaded on intent, off-air slate, week list), `/tv/palinsesto` (week grid + programme
+    index), `/tv/programmi/[slug]` (12 programmes, playlists), `/temi/[slug]` (6 hubs),
+    `/[slug]` (article: breadcrumb, dek, byline, video-first media, sanitized prose, related),
+    `/cerca`, `/chi-siamo`, `not-found`.
+  - **Editorial data**: `app/src/lib/schedule.ts` encodes the published grid from
+    `teleambiente.tv/palinsesto-televisivo/` (12 programmes, 13 slots, weekdays in Rome time)
+    with honest empty days (lunedì, domenica) and the Wednesday 21:30 collision preserved.
+  - **Content seam extended, templates untouched by WP**: `getArticlesByCategory`,
+    `getCategoryBySlug`, `getHubs`, `searchArticles` added to the adapter and the
+    `ContentSource` interface.
+  - **Body hygiene** in `content/html.ts`, all unit-tested: `sanitizeHtml` (drops scripts,
+    inline handlers, non-allowlisted iframes; keeps editorial figures), `cleanDek` (no
+    mid-sentence deks), `stripLeadingDek` (no duplicated intro paragraph), `replaceSocialEmbeds`
+    (dead Instagram blockquotes become links).
+- Files: `app/PRODUCT.md`, `app/src/app/globals.css`, `app/src/fonts/*`, `app/src/app/*`
+  (all templates above), `app/src/components/*` (7), `app/src/lib/{schedule,format,navigation}.ts`,
+  `app/src/lib/content/{wp,index,html}.ts` + 2 test files, `app/public/brand/teleambiente-logo.webp`,
+  `scripts/dev/shot.mjs`, `docs/design/visual-direction.md`, `docs/design/screens/*.jpg`.
+- Decided:
+  - **The schedule is the site's spine**, not a side page: on-air bar on every page, live page
+    with week list, `oggi` marker in the grid. This follows the owner's answer ("Live TV +
+    schedule as a real utility") and is what distinguishes the site from a generic news
+    template.
+  - **No cards, one accent, print grammar.** The listings-magazine world refuses the
+    category default the owner named as the anti-goal ("generic news template").
+  - **Video-first on article pages**: when a story ships a video, the video is the lede media
+    and the featured image is skipped, so the same frame is never shown twice.
+  - **Schedule is editorial data, not scraped**: it lives in `schedule.ts` until the CMS owns
+    it; the UI states where the grid is empty instead of inventing slots.
+  - **Screenshots are produced through CDP** (`scripts/dev/shot.mjs`) because Chrome 158's
+    `--screenshot` ignores `--window-size`; the script also reports viewport/scroll width and
+    `<h1>` count, which is how the mobile layout was verified.
+- Verified (2026-11-25):
+  - `pnpm typecheck` → clean; `pnpm test` → **32/32 pass** (3 files); `pnpm lint` → clean;
+    `pnpm build` → 25 routes (SSG for 6 hubs + 12 programmes, ISR home/categories,
+    on-demand articles).
+  - CDP render check at 1440 and 390: `scrollWidth === viewport` (no horizontal overflow),
+    exactly one `<h1>` on home, live, palinsesto, hub, article.
+  - `impeccable detect --json src/app src/components src/app/globals.css` → `[]` (no findings).
+  - Rendered with real content: 10+ live articles, real hubs and counts, real programme grid;
+    on-air bar correctly reports "nessun programma in onda" at 15:47 and the next slot at 21:00.
+- Open / next:
+  - `DESIGN.md` still to be written from the built system (Impeccable `build-phase finish`).
+  - Lighthouse/Web Vitals not measured on this build (PSI quota exhausted); the M4 budgets
+    (JS ≤ 150 KB gzip, LCP < 2.0 s) are unproven until a local Lighthouse run.
+  - Schedule needs newsroom confirmation: lunedì and domenica are empty in the published grid,
+    and mercoledì 21:30 has two programmes (L'Architutto, Centomila Voci).
+  - Newsletter form is inert on purpose (no list exists); search is WP full-text, not the
+    future index; no analytics, no consent banner, no CMS yet.
+  - Brand assets still missing: vector logo, programme logos, licensed photography.

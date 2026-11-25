@@ -18,6 +18,10 @@ coverage/
 .env.*
 !.env.example
 
+# Next.js generates this on dev/build; its import path flips between .next/dev/types
+# and .next/types, so tracking it only creates churn.
+app/next-env.d.ts
+
 # tooling state
 .impeccable/config.local.json
 .vercel/

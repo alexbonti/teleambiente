@@ -308,3 +308,33 @@ or the chat.
 - Fixed on the way: pnpm version was declared twice (workflow + `packageManager`), which
   failed the first run with `ERR_PNPM_BAD_PM_VERSION`; the workflow now reads it from
   `package.json`. Actions bumped to checkout/setup-node v5.
+
+## 2026-11-25 — Phase 1 plan seeded on the shared task board
+
+- Status: done
+- Goal: make the remaining Phase 1 milestones (M2/M3/M5/M6 plus the M4 leftovers) explicit,
+  owned and orderable instead of living in a chat plan, so another agent or a teammate can
+  pick up work without asking.
+- Did: created eleven shared tasks with acceptance criteria, advisory write scopes and
+  dependencies (ids are board-local and may change between sessions — match by subject):
+  - `Analytics baseline: GA4 + Search Console → data/baseline/` — blocking; needs owner access.
+  - `Discovery interviews (owner): director, commercial deals, editorial reality` — unblocks M2.
+  - `M2 — Business strategy and KPI tree (Gate 1)` — blocked by the two above.
+  - `M3 — IA, taxonomy and URL/content model` — ready.
+  - `M3 follow-up — data/redirects.csv and a redirect validator` — blocked by M3.
+  - `M4 follow-up — Lighthouse/Web Vitals budget verification` — ready (budget still unproven).
+  - `M4 follow-up — DESIGN.md via the Impeccable document pass` — ready (doctor: design missing).
+  - `Pages preview — fresh content and a domain decision` — ready.
+  - `Brand assets intake (owner)` — ready, owner-side.
+  - `M5 — CMS migration spike (50 posts → Sanity) and architecture docs (Gate 2)` — blocked by M3.
+  - `M6 — Launch readiness, cutover runbook and handover` — blocked by M5.
+- Files: none (board state lives in the session/team runtime, not the repo).
+- Decided: gate reviews are not separate board items — Gate 1 questions close M2 and the Gate 2
+  decision brief closes M5; a standalone "gate" task with no artifact would just be noise.
+  Nothing in M5/M6 is started before Gate 1, because a migration plan written against an
+  unsigned strategy gets rewritten.
+- Verified: `team_task_list` returns eleven pending tasks; `ready: false` only where a
+  blocker is genuinely unresolved, so the ready queue is: baseline, interviews, M3,
+  M4-Lighthouse, M4-DESIGN.md, Pages preview, brand assets.
+- Open / next: the two owner-side items (analytics access, interviews) are the critical path;
+  everything downstream is waiting on them or on Gate 1.

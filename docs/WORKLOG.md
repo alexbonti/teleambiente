@@ -240,3 +240,20 @@ or the chat.
   - Newsletter form is inert on purpose (no list exists); search is WP full-text, not the
     future index; no analytics, no consent banner, no CMS yet.
   - Brand assets still missing: vector logo, programme logos, licensed photography.
+
+## 2026-11-25 — Impeccable skill updated to v4.11.0
+
+- Status: done
+- Goal: pick up the Impeccable release offered during the M4 build (was v4.7.0).
+- Did: ran `npx impeccable@latest update`; it rewrote the user-level skill under
+  `~/.dsh/skills/impeccable` and installed engine `v0.1.30` (darwin-arm64) at
+  `~/.impeccable/bin/0.1.30/impeccable`. No project files changed.
+- Files: none in the repo (skill lives outside the workspace).
+- Verified: `impeccable doctor` → "No drift found"; workspaces report
+  `app  product: child  design: missing  platform: web`.
+- Open / next: the updated skill still wants `DESIGN.md` for `app/` (we have
+  `docs/design/visual-direction.md` as the interim record). Generate it from the built
+  tokens in the next design session — the skill's `document` pass reads `globals.css`
+  rather than a hand-written duplicate.
+- Note: the update writes outside the workspace, so it needs full file access; under the
+  `workspace-write` sandbox it fails with `EACCES … ~/.dsh/skills/impeccable/SKILL.md`.
